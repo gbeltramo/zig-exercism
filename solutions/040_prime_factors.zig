@@ -12,12 +12,12 @@ pub fn factors(allocator: mem.Allocator, value: u64) mem.Allocator.Error![]u64 {
     var length_factors: usize = 0;
     while (current_value > 1) {
         const max_divisor: u64 = @max(std.math.sqrt(current_value), 10);
-        for (2..max_divisor) |x| {
+        inner_loop: for (2..max_divisor) |x| {
             if ((current_value % x) == 0) {
                 buffer[length_factors] = x;
                 length_factors += 1;
                 current_value = @divExact(current_value, x);
-                break;
+                break :inner_loop;
             }
         } else {
             buffer[length_factors] = current_value;
