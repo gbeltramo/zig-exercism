@@ -1,0 +1,18 @@
+[
+  {
+    "label": "Debug Zig test",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "$ZED_WORKTREE_ROOT/zig-out/bin/test-bin",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "build": {
+      "command": "/Users/gabri/Lang/zig/bin/zig",
+      "args": [
+        "test",
+        "$ZED_FILE",
+        "--test-no-exec",
+        "-femit-bin=zig-out/bin/test-bin"
+      ]
+    }
+  }
+]
