@@ -1,0 +1,8 @@
+[
+  {
+    "label": "Remove blank lines in function bodies",
+    "command": "sed -i -E ':a;N;$!ba; s/\\n[ \\t]*\\n([ \\t]+)/\\n\\1/g' \"$ZED_FILE\"",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+  },
+]
