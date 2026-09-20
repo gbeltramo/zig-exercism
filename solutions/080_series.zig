@@ -1,0 +1,112 @@
+const std = @import("std");
+const mem = std.mem;
+const testing = std.testing;
+
+pub fn slices(comptime slice_length: usize, allocator: mem.Allocator, series: []const u8) mem.Allocator.Error![][slice_length]u8 {
+    comptime {
+        std.debug.assert(slice_length > 0);
+    }
+
+    if (slice_length > series.len) {
+        return allocator.alloc([slice_length]u8, 0);
+    }
+
+    var list: std.ArrayList([slice_length]u8) = .empty;
+    errdefer list.deinit(allocator);
+
+    for (0..series.len - slice_length + 1) |idx_start| {
+        const value: [slice_length]u8 = series[idx_start..][0..slice_length].*;
+        try list.append(allocator, value);
+    }
+
+    return list.toOwnedSlice(allocator);
+}
+
+test "slices of one from one" {
+    const series = "1";
+    const expected = [_][1]u8{
+        "1"[0..1].*, //
+    };
+    const actual = try slices(1, testing.allocator, series);
+    defer testing.allocator.free(actual);
+    try testing.expectEqualSlices([1]u8, &expected, actual);
+}
+
+test "slices of one from two" {
+    const series = "12";
+    const expected = [_][1]u8{
+        "1"[0..1].*, //
+        "2"[0..1].*, //
+    };
+    const actual = try slices(1, testing.allocator, series);
+    defer testing.allocator.free(actual);
+    try testing.expectEqualSlices([1]u8, &expected, actual);
+}
+
+test "slices of two" {
+    const series = "35";
+    const expected = [_][2]u8{
+        "35"[0..2].*, //
+    };
+    const actual = try slices(2, testing.allocator, series);
+    defer testing.allocator.free(actual);
+    try testing.expectEqualSlices([2]u8, &expected, actual);
+}
+
+test "slices of two overlap" {
+    const series = "9142";
+    const expected = [_][2]u8{
+        "91"[0..2].*, //
+        "14"[0..2].*, //
+        "42"[0..2].*, //
+    };
+    const actual = try slices(2, testing.allocator, series);
+    defer testing.allocator.free(actual);
+    try testing.expectEqualSlices([2]u8, &expected, actual);
+}
+
+test "slices can include duplicates" {
+    const series = "777777";
+    const expected = [_][3]u8{
+        "777"[0..3].*, //
+        "777"[0..3].*, //
+        "777"[0..3].*, //
+        "777"[0..3].*, //
+    };
+    const actual = try slices(3, testing.allocator, series);
+    defer testing.allocator.free(actual);
+    try testing.expectEqualSlices([3]u8, &expected, actual);
+}
+
+test "slices of a long series" {
+    const series = "918493904243";
+    const expected = [_][5]u8{
+        "91849"[0..5].*, //
+        "18493"[0..5].*, //
+        "84939"[0..5].*, //
+        "49390"[0..5].*, //
+        "93904"[0..5].*, //
+        "39042"[0..5].*, //
+        "90424"[0..5].*, //
+        "04243"[0..5].*, //
+    };
+    const actual = try slices(5, testing.allocator, series);
+    defer testing.allocator.free(actual);
+    try testing.expectEqualSlices([5]u8, &expected, actual);
+}
+
+test "slice length is too large" {
+    const series = "12345";
+    const expected = [_][6]u8{};
+    const actual = try slices(6, testing.allocator, series);
+    defer testing.allocator.free(actual);
+    try testing.expectEqualSlices([6]u8, &expected, actual);
+}
+
+test "slice length is way too large" {
+    const series = "12345";
+    const expected = [_][42]u8{};
+    const actual = try slices(42, testing.allocator, series);
+    defer testing.allocator.free(actual);
+    try testing.expectEqualSlices([42]u8, &expected, actual);
+}
