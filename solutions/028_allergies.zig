@@ -14,17 +14,17 @@ pub const Allergen = enum(u8) {
 };
 
 pub fn isAllergicTo(score: u8, allergen: Allergen) bool {
-    const mask = @intFromEnum(allergen);
+    const mask = @backingInt(allergen);
     return (score & mask) != 0;
 }
 
 pub fn initAllergenSet(score: usize) EnumSet(Allergen) {
-    var bitset = EnumSet(Allergen).initEmpty();
+    var bitset: EnumSet(Allergen) = .empty;
 
     for (0..8) |power| {
         const mask: u8 = @as(u8, 1) << @intCast(power);
         if (score & mask != 0) {
-            bitset.insert(@enumFromInt(mask));
+            bitset.insert(@fromBackingInt(@intCast(mask)));
         }
     }
 

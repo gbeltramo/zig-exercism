@@ -13,16 +13,20 @@ pub fn recite(allocator: mem.Allocator, words: []const []const u8) mem.Allocator
     if (words.len == 0) return list.toOwnedSlice(allocator);
 
     for (0..words.len - 1) |idx| {
-        const word0 = words[idx];
-        const word1 = words[idx + 1];
-        const new_sentence = try std.fmt.allocPrint(allocator, "For want of a {s} the {s} was lost.\n", .{ word0, word1 });
-        errdefer allocator.free(new_sentence);
-        try list.append(allocator, new_sentence);
+        const sentence = try fmt.allocPrint(
+            allocator,
+            "For want of a {s} the {s} was lost.\n",
+            .{ words[idx], words[idx + 1] },
+        );
+        list.appendAssumeCapacity(sentence);
     }
 
-    const final_sentence = try std.fmt.allocPrint(allocator, "And all for the want of a {s}.\n", .{words[0]});
-    errdefer allocator.free(final_sentence);
-    try list.append(allocator, final_sentence);
+    const final_sentence = try fmt.allocPrint(
+        allocator,
+        "And all for the want of a {s}.\n",
+        .{words[0]},
+    );
+    list.appendAssumeCapacity(final_sentence);
 
     return list.toOwnedSlice(allocator);
 }
